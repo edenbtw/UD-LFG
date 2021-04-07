@@ -6,4 +6,5 @@ well-formed according to a Lexical Functional Grammar framework. The end result 
 f-structures, and the implementation of functions that return valid antecedants for anaphorically bound pronouns to demonstrate this conversion's utility
 in a potential semantic corpus study.
 
+Contained are a sample from the HDT-UD, the converter at its current stage of development, and test files for some of the tricker phenomena covered so far.
 Conversions for clausal modifiers, expletive subjets and copulars are yet to be implemented. The conversion will be finished some time before June.
