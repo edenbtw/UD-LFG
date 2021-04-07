@@ -1,0 +1,16 @@
+# generator = UDPipe 2, https://lindat.mff.cuni.cz/services/udpipe
+# udpipe_model = german-hdt-ud-2.6-200830
+# udpipe_model_licence = CC BY-NC-SA
+# newdoc
+# newpar
+# sent_id = 1
+# text = Ich liebe meinen grosser und fetter Vater.
+1	Ich	Ich	PRON	PPER	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	TokenRange=0:3
+2	liebe	lieben	VERB	VVFIN	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=4:9
+3	meinen	mein	PRON	PPOSAT	Case=Acc|Gender=Masc|Number=Sing|Person=1|Poss=Yes|PronType=Prs	7	det	_	TokenRange=10:16
+4	grosser	gross	ADJ	ADJA	Case=Nom|Degree=Pos|Gender=Masc|Number=Sing	7	amod	_	TokenRange=17:24
+5	und	und	CCONJ	KON	_	6	cc	_	TokenRange=25:28
+6	fetter	fett	ADJ	ADJA	Case=Nom|Degree=Pos|Gender=Masc|Number=Sing	4	conj	_	TokenRange=29:35
+7	Vater	Vater	NOUN	NN	Gender=Masc|Number=Sing|Person=3	2	obj	_	SpaceAfter=No|TokenRange=36:41
+8	.	.	PUNCT	$.	PunctType=Peri	2	punct	_	SpaceAfter=No|TokenRange=41:42
+
