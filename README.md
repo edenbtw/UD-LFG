@@ -1,4 +1,4 @@
-# ud-lfg
+# UD=>LFG
 A converter from the UD annotation scheme of the HDT-UD into LFG f-structures.
 
 This is a work-in-progress piece of coursework for my degree in linguistics which converts UD annotation stored in a CoNLL-U file format into f-structures
