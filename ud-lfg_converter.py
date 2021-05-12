@@ -1,9 +1,10 @@
 import re
 import conllu
-import 'token_class.py'
+from token_class import *
 
 # the conllu library parses the file into sentences and each sentence into tokens; each token is a dictionary with with the following keys:
 # id, form, lemma, upos, xpos, feats, head, deprel, deps, misc.
+# the Token class is a class of object in which relevant data is stored and methods for conversion are defined.
 
 def parse_filter(sentence):
     filtered_sentence = []
@@ -31,6 +32,8 @@ def parse_filter(sentence):
             # any token which passes these criteria is appended to the filtered sentence, which is ready to be converted to an f_structure.
 
     return filtered_sentence
+
+    # note that parse_filter requires some functions defined for Token, also imported.
 
 def f_hierarchy(token):
     if token.gf == '*CONJ':
@@ -184,6 +187,7 @@ def pred_format(token):
 def f_compose(sentence):
     f_structure = {}
     tokens = []
+    obl_counter = 1
 
     for token in sentence:
         token_object = Token(token)
@@ -293,6 +297,30 @@ def f_compose(sentence):
                 # if the dependant's GF is an ADJ, a check is performed to see if an ADJ function is already nested inside the token's value.
                 # if there is one, the new ADJ value(s) is (are) appended to the original ADJ's list. if there isn't, the dependant's key and value are nested inside the token's value.
             
+            elif dependant.gf == 'OBL':
+                try:
+                    if 'OBL' in token.value.keys():
+                        obl_counter += 1
+                        dependant.gf = 'OBL{}'.format(obl_counter)
+
+                        token.value[dependant.gf] = dependant.value
+                    
+                    else:
+                        token.value['OBL'] = dependant.value
+                
+                except:
+                    if 'OBL' in token.value[0].keys():
+                        obl_counter += 1
+                        dependant.gf = 'OBL{}'.format(obl_counter)
+
+                        token.value[dependant.gf] = dependant.value
+                    
+                    else:
+                        token.value['OBL'] == dependant.value
+
+                # if the dependant's GF is an ADJ, a check is performed to see if an OBL function is already nested inside the token's value.
+                # if there is one, the new OBL function has its self.gf property renamed to ensure that it is distinct from any other OBLs in composition.
+
             else:
                 try:
                     token.value[key] = value

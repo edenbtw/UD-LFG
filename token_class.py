@@ -215,10 +215,10 @@ class Token:
             self.arg = False
 
             if 'Case' in self.feats.keys():
-                return 'CASE', {'PRED': '{}< >'.format(self.feats['Case']).upper()}
+                return 'CASE', self.feats['Case'].upper()
 
             else:
-                return 'CASE', {'PRED': '{}'.format(self.lemma)}
+                return 'CASE', self.lemma.upper()
 
         else:
             return 'NONE', {'NONE': 'NONE< >'}
@@ -236,10 +236,10 @@ class Token:
 
         if self.upos == 'DET':
             if self.lemma.lower() in definite_articles:
-                return 'DEF', {'PRED': '+'}
+                return 'DEF', '+'
 
             elif self.lemma.lower() in indefinite_articles:
-                return 'DEF', {'PRED': '-'}
+                return 'DEF', '-'
 
             else:
                 return 'SPEC', {'PRED': '{}< >'.format(self.lemma)}
@@ -289,59 +289,59 @@ class Token:
         if self.upos in feat_gf_upos:
             if 'Case' in self.feats.keys():
                 try:
-                    self.value['CASE'] = {'PRED': self.feats['Case'].upper()}
+                    self.value['CASE'] = self.feats['Case'].upper()
 
                 except:
-                    self.value[0]['CASE'] = {'PRED': self.feats['Case'].upper()}
+                    self.value[0]['CASE'] = self.feats['Case'].upper()
             
             if 'Gender' in self.feats.keys():
                 try:
-                    self.value['GEN'] = {'PRED': self.feats['Gender'].upper()}
+                    self.value['GEN'] = self.feats['Gender'].upper()
 
                 except:
-                    self.value[0]['GEN'] = {'PRED': self.feats['Gender'].upper()}
+                    self.value[0]['GEN'] = self.feats['Gender'].upper()
             
             if 'Number' in self.feats.keys():
                 try:
-                    self.value['NUM'] = {'PRED': self.feats['Number'].upper()}
+                    self.value['NUM'] = self.feats['Number'].upper()
 
                 except:
-                    self.value[0]['NUM'] = {'PRED': self.feats['Number'].upper()}
+                    self.value[0]['NUM'] = self.feats['Number'].upper()
             
             if 'Person' in self.feats.keys():
                 try:
-                    self.value['PERS'] = {'PRED': self.feats['Person'].upper()}
+                    self.value['PERS'] = self.feats['Person'].upper()
 
                 except:
-                    self.value[0]['PERS'] = {'PRED': self.feats['Person'].upper()}
+                    self.value[0]['PERS'] = self.feats['Person'].upper()
             
             if 'Mood' in self.feats.keys():
                 try:
-                    self.value['MOOD'] = {'PRED': self.feats['Mood'].upper()}
+                    self.value['MOOD'] = self.feats['Mood'].upper()
 
                 except:
-                    self.value[0]['MOOD'] = {'PRED': self.feats['Mood'].upper()}
+                    self.value[0]['MOOD'] = self.feats['Mood'].upper()
 
             if 'Person' in self.feats.keys():
                 try:
-                    self.value['PERS'] = {'PRED': self.feats['Person'].upper()}
+                    self.value['PERS'] = self.feats['Person'].upper()
 
                 except:
-                    self.value[0]['PERS'] = {'PRED': self.feats['Person'].upper()}
+                    self.value[0]['PERS'] = self.feats['Person'].upper()
 
             if 'Tense' in self.feats.keys():
                 try:
-                    self.value['TENSE'] = {'PRED': self.feats['Tense'].upper()}
+                    self.value['TENSE'] = self.feats['Tense'].upper()
 
                 except:
-                    self.value[0]['TENSE'] = {'PRED': self.feats['Tense'].upper()}
+                    self.value[0]['TENSE'] = self.feats['Tense'].upper()
 
             if 'Aspect' in self.feats.keys():
                 try:
-                    self.value['ASP'] = {'PRED': self.feats['Aspect'].upper()}
+                    self.value['ASP'] = self.feats['Aspect'].upper()
 
                 except:
-                    self.value[0]['ASP'] = {'PRED': self.feats['Aspect'].upper()}
+                    self.value[0]['ASP'] = self.feats['Aspect'].upper()
 
     def convert(self):
         if self.subtype == 'simple':
