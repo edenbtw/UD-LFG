@@ -1,5 +1,5 @@
 import re
-import conllu
+from conllu import *
 from token_class import *
 
 # the conllu library parses the file into sentences and each sentence into tokens; each token is a dictionary with with the following keys:
@@ -105,7 +105,7 @@ def nest_order(tokens):
 
         # the matrix predicate is in the ordered list. it's dependants are in the waiting room.
     
-    while len(ordered_tokens) < len(tokens):
+    while len(ordered_tokens_waiting_room) > 0:
         for token in ordered_tokens_waiting_room:
             for dependant in token.dependants:
                 ordered_tokens_reception.append(dependant)
@@ -137,9 +137,15 @@ def pred_format(token):
     exception_preds = ['DEF', 'CASE', 'GEN', 'PERS', 'MOOD', 'TENSE', 'NUM', 'ASP', 'COORD', '*COORD', '*CPOUND']
 
     if token.upos == 'PRON' and token.gf != 'SPEC':
-        token.value['PRED'] = 'PRO'
+        try:
+            token.value['PRED'] = 'PRO'
 
-        return
+            return
+
+        except:
+            token.value[0]['PRED'] = 'PRO'
+
+            return
 
         # if the token is a pronoun and not a specifier, its PRED value must be PRO.
 
@@ -154,10 +160,11 @@ def pred_format(token):
         arg_string = ''
 
         # if the token has arguments and is not an ADJ, open_arg and close_arg are fragments of the original PRED value.
-        # the exception is for formatting PRED values inside coordinations.
+        # the exception is for formatting PRED values inside lists.
 
         for argument in token.arguments:
-            arg_string = arg_string + '(' + argument + ')'
+            if argument != '*SUBJ':
+                arg_string = arg_string + '(' + argument + ')'
 
         try:
             token.value['PRED'] = open_arg + arg_string + close_arg
@@ -201,11 +208,6 @@ def f_compose(sentence):
     # the tokens list now contains every token which is the head of another token, with a list of their dependants as a property, ordered for composition.
 
     for token in tokens:
-        if token.head == 0:
-            matrix_pred = token
-
-            # the matrix predicate is located.
-
         for dependant in token.dependants:
             key, value = dependant.gf, dependant.value
 
@@ -233,13 +235,21 @@ def f_compose(sentence):
                 # the value(s) of the token must be placed inside a list with the coordinated conjunction or parataxis.
 
             elif dependant.gf == 'COORD':
+                try:
                     token.value[0]['COORD'] = value
+                
+                except:
+                    token.value['COORD'] = value
                     
                 # if the dependant is a COORD, it must be the dependant of a coordinated conjunction and is nested appropriately.
                 # this may result in replacing the default COORD function values 'PARATAXIS' and 'LIST' (see. Token.convert_coordinants()).
                 
             elif dependant.gf == '*CPOUND':
-                compound_token = dependant.value['PRED']
+                try:
+                    compound_token = dependant.value['PRED']
+                
+                except:
+                    compound_token = dependant.value[0]['PRED']
 
                 if compound_token[0] == '-':
                     new_pred = token.lemma + compound_token
@@ -267,7 +277,16 @@ def f_compose(sentence):
                         token.form = '{}'.format(new_pred)
                         token.lemma = '{}'.format(new_pred)
 
-                # if the dependant is part of a compound, is is placed at either the beginning or the end of the token's PRED value string.
+                # if the dependant is part of a compound, it is placed at either the beginning or the end of the token's PRED value string.
+            
+            elif dependant.gf == '*SUBJ':
+                try:
+                    token.value['PRED'] = token.value['PRED'] + '(SUBJ)'
+                        
+                except:
+                    token.value[0]['PRED'] = token.value[0]['PRED'] + '(SUBJ)'
+
+                # if the dependant is an expletive subject, it is placed at the end of the token's PRED value string, outside the angled brackets.
 
             elif dependant.gf == 'ADJ':
                 try:
@@ -285,7 +304,7 @@ def f_compose(sentence):
                 except:
                     if 'ADJ' in token.value[0].keys():
                         for sub_value in value:
-                            token.value['ADJ'].append(sub_value)
+                            token.value[0]['ADJ'].append(sub_value)
 
                     else:
                         try:
@@ -313,46 +332,60 @@ def f_compose(sentence):
                         obl_counter += 1
                         dependant.gf = 'OBL{}'.format(obl_counter)
 
-                        token.value[dependant.gf] = dependant.value
+                        token.value[0][dependant.gf] = dependant.value
                     
                     else:
-                        token.value['OBL'] == dependant.value
+                        token.value[0]['OBL'] = dependant.value
 
                 # if the dependant's GF is an ADJ, a check is performed to see if an OBL function is already nested inside the token's value.
                 # if there is one, the new OBL function has its self.gf property renamed to ensure that it is distinct from any other OBLs in composition.
 
             else:
-                try:
-                    token.value[key] = value
+                if key != '*SUBJ':
+                    try:
+                        token.value[key] = value
 
-                except:
-                    token.value[0][key] = value
+                    except:
+                        token.value[0][key] = value
                             
-                # if the dependant is none of the above (if it is simple),
+                # if the dependant is none of the above (if it is simple), and not an expletive subject,
                 # the dependant's key and value are nested inside the token's value (the exception is for nesting inside coordinated values as above).
 
         pred_format(token)
 
         # the pred value of the token is formatted to list its arguments if it has any, and to be simplified if it does not.
 
-    key, value = matrix_pred.gf, matrix_pred.value
-    f_structure[key] = value
+    matrix_pred = None
+
+    for token in tokens:
+        if token.head == 0:
+            matrix_pred = token
+
+    # the matrix predicate is located if it is recorded in the HDT-UD (i believe there are some sentences where this is corrupted).
+
+    if matrix_pred != None:
+        f_structure[matrix_pred.gf] = matrix_pred.value
 
     # every token's conversion to a GF is nested inside the value of its head, and the matrix predicate is nested inside the empty f_structure.
     # because of nest_order(), no GF can be left out of this composition.
 
-    return f_structure
+        return f_structure
 
-with open('test_compounds.conllu', 'r') as hdt_ud_1to10000A_102001to112000B:
-    parse = conllu.parse(hdt_ud_1to10000A_102001to112000B.read())
-    
-    for sentence in parse:
+with open('de_hdt-ud-dev.conllu', 'r') as hdt_ud_1to10000A_102001to112000B, open('hdt_ud_1to10000A_102001to112000B.txt', 'w') as f_structure_file:
+    sentence_list = parse(hdt_ud_1to10000A_102001to112000B.read())
+
+    for sentence in sentence_list:
         filtered_sentence = parse_filter(sentence)
 
-        if filtered_sentence == False:
-            pass
+        if type(filtered_sentence) != list:
+            continue
 
         # if the sentence is returned by parse_filter, it has no punctuation, particles or markers, and is ready to be converted into an f-structure.
 
         f_structure = f_compose(filtered_sentence)
-        print(f_structure)
+
+        if type(f_structure) != dict:
+            continue
+
+        f_structure_file.write(str(f_structure))
+        f_structure_file.write('\n')

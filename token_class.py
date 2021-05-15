@@ -214,11 +214,15 @@ class Token:
         elif self.deprel == 'case':
             self.arg = False
 
-            if 'Case' in self.feats.keys():
-                return 'CASE', self.feats['Case'].upper()
+            try:
+                if 'Case' in self.feats.keys():
+                    return 'CASE', {'PRED': self.feats['Case'].upper()}
 
-            else:
-                return 'CASE', self.lemma.upper()
+                else:
+                    return 'CASE', {'PRED': self.lemma.upper()}
+
+            except:
+                return 'CASE', {'PRED': self.lemma.upper()}
 
         else:
             return 'NONE', {'NONE': 'NONE< >'}
@@ -226,7 +230,7 @@ class Token:
     def convert_auxilliaries(self):
         self.arg = False
 
-        return '*CPOUND', {'PRED': '{}-'.format(self.lemma)}
+        return '*CPOUND', {'PRED': '{}-'.format(self.form)}
 
     def convert_determiners(self):
         definite_articles = ['der', 'die', 'das', 'des', 'den', 'dem']
@@ -236,10 +240,10 @@ class Token:
 
         if self.upos == 'DET':
             if self.lemma.lower() in definite_articles:
-                return 'DEF', '+'
+                return 'DEF', {'BOOL': '+'}
 
             elif self.lemma.lower() in indefinite_articles:
-                return 'DEF', '-'
+                return 'DEF', {'BOOL': '-'}
 
             else:
                 return 'SPEC', {'PRED': '{}< >'.format(self.lemma)}
@@ -258,9 +262,23 @@ class Token:
 
         # the dummy gf '*CPOUND' will not be part of the f_structure, it's just a marker.
 
-    # def convert_claus_mods(self):
+    def convert_claus_mods(self):
+        self.arg = False
 
-    # def convert_comp_preds(self):
+        return 'ADJ', [{'PRED': '{}< >'.format(self.lemma)}]
+
+        # see. report section 3.1.2.5 for a record of the problems here.
+
+    def convert_comp_preds(self):
+        if self.deprel == 'expl':
+            self.arg = True
+
+            return '*SUBJ', {'PRED': '{}< >'.format(self.lemma)}
+
+        elif self.deprel == 'cop':
+            self.arg = False
+
+            return 'COP', {'PRED': '{}< >'.format(self.lemma)}
 
     def convert_coordinants(self):
         if self.deprel == 'conj':
@@ -356,11 +374,11 @@ class Token:
         elif self.subtype == 'compound':
             self.gf, self.value = self.convert_compounds()
 
-        # elif self.subtype == 'clausal_modifier':
-            # self.gf, self.value = self.convert_claus_mods()
+        elif self.subtype == 'clausal_modifier':
+            self.gf, self.value = self.convert_claus_mods()
 
-        # elif self.subtype == 'complex_pred':
-            # self.gf, self.value = self.convert_comp_preds()
+        elif self.subtype == 'complex_pred':
+            self.gf, self.value = self.convert_comp_preds()
         
         elif self.subtype == 'coordinant':
             self.gf, self.value = self.convert_coordinants()
