@@ -134,7 +134,7 @@ def nest_order(tokens):
     return ordered_heads
 
 def pred_format(token):
-    exception_preds = ['DEF', 'CASE', 'GEN', 'PERS', 'MOOD', 'TENSE', 'NUM', 'ASP', 'COORD', '*COORD', '*CPOUND']
+    exception_preds = ['DEF', 'CASE', 'GEN', 'PERS', 'MOOD', 'TENSE', 'NUM', 'ASP', 'COORD', '*CPOUND']
 
     if token.upos == 'PRON' and token.gf != 'SPEC':
         try:
@@ -166,13 +166,13 @@ def pred_format(token):
             if argument != '*SUBJ':
                 arg_string = arg_string + '(' + argument + ')'
 
-        try:
-            token.value['PRED'] = open_arg + arg_string + close_arg
+            try:
+                token.value['PRED'] = open_arg + arg_string + close_arg
             
-        except:
-            token.value[0]['PRED'] = open_arg + arg_string + close_arg
+            except:
+                token.value[0]['PRED'] = open_arg + arg_string + close_arg
 
-            # the new PRED value is formatted to include the names of the argument grammatical functions and added.
+                # the new PRED value is formatted to include the names of the argument grammatical functions and added.
 
     else:
         if token.gf not in exception_preds:
@@ -194,7 +194,8 @@ def pred_format(token):
 def f_compose(sentence):
     f_structure = {}
     tokens = []
-    obl_counter = 1
+    obl_counter = 0
+    obj_counter = 1
 
     for token in sentence:
         token_object = Token(token)
@@ -210,11 +211,6 @@ def f_compose(sentence):
     for token in tokens:
         for dependant in token.dependants:
             key, value = dependant.gf, dependant.value
-
-            if dependant.arg == True:
-                token.arguments.append(key)
-
-                # if the dependant token is an argument, its key is added to its head's list of arguments for pred_format().
 
             if dependant.gf == '*COORD':
                 coordination_list = []
@@ -317,25 +313,63 @@ def f_compose(sentence):
                 # if there is one, the new ADJ value(s) is (are) appended to the original ADJ's list. if there isn't, the dependant's key and value are nested inside the token's value.
             
             elif dependant.gf == 'OBL':
-                try:
-                    if 'OBL' in token.value.keys():
-                        obl_counter += 1
-                        dependant.gf = 'OBL{}'.format(obl_counter)
+                obl_counter += 1
+                obl_theme = False
 
-                        token.value[dependant.gf] = dependant.value
+                for deep_dependant in dependant.dependants:
+                    if deep_dependant.gf == 'CASE':
+                        dependant.gf = 'OBL:{}'.format(deep_dependant.form.upper())
+                            
+                        obl_theme = True
+
+                if obl_theme == False:
+                    dependant.gf = 'OBL:{}'.format(obl_counter)
+
+                try:
+                    token.value[dependant.gf] = dependant.value
+
+                except:
+                    token.value[0][dependant.gf] = dependant.value
+
+                # if the dependant's GF is an ADJ, a check is performed to see if an OBL function is already nested inside the token's value.
+                # if there is one, the new OBL function has its self.gf property renamed to ensure that it is distinct from any other OBLs in composition.
+
+            elif dependant.gf == 'OBJ':
+                try:
+                    if 'OBJ' in token.value.keys():
+                        obj_counter += 1
+                        obj_theme = False
+
+                        for deep_dependant in dependant.dependants:
+                            if deep_dependant.gf == 'CASE':
+                                dependant.gf = 'OBJ:{}'.format(deep_dependant.form.upper())
+                                obj_theme = True
+
+                        if obj_theme == False:
+                            dependant.gf = 'OBJ:{}'.format(obj_counter)
+
+                            token.value[dependant.gf] = dependant.value
                     
                     else:
-                        token.value['OBL'] = dependant.value
+                        token.value['OBJ'] = dependant.value
                 
                 except:
-                    if 'OBL' in token.value[0].keys():
-                        obl_counter += 1
-                        dependant.gf = 'OBL{}'.format(obl_counter)
+                    if 'OBJ' in token.value[0].keys():
+                        obj_counter += 1
+                        obj_theme = False
 
-                        token.value[0][dependant.gf] = dependant.value
+                        for deep_dependant in dependant.dependants:
+                            if deep_dependant.gf == 'CASE':
+                                dependant.gf = 'OBJ:{}'.format(deep_dependant.form.upper())
+                                obj_theme = True
+
+                        if obj_theme == False:
+                            dependant.gf = 'OBJ:{}'.format(obj_counter)
+
+                            token.value[0][dependant.gf] = dependant.value
                     
                     else:
-                        token.value[0]['OBL'] = dependant.value
+                        token.value[0]['OBJ'] = dependant.value
 
                 # if the dependant's GF is an ADJ, a check is performed to see if an OBL function is already nested inside the token's value.
                 # if there is one, the new OBL function has its self.gf property renamed to ensure that it is distinct from any other OBLs in composition.
@@ -350,6 +384,11 @@ def f_compose(sentence):
                             
                 # if the dependant is none of the above (if it is simple), and not an expletive subject,
                 # the dependant's key and value are nested inside the token's value (the exception is for nesting inside coordinated values as above).
+            
+            if dependant.arg == True:
+                token.arguments.append(dependant.gf)
+
+                # if the dependant token is an argument, its gf is added to its head's list of arguments for pred_format().
 
         pred_format(token)
 

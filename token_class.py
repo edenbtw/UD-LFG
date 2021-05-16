@@ -179,7 +179,8 @@ class Token:
         elif self.deprel == 'xcomp':
             self.arg = True
 
-            return 'XCOMP', {'PRED': '{}< >'.format(self.lemma)}
+            return 'XCOMP', {'PRED': '{}< >'.format(self.lemma),
+                            'SSUBJ': '(SUBJ^)'}
 
         elif self.deprel == 'nmod':
             self.arg = False
@@ -278,7 +279,7 @@ class Token:
         elif self.deprel == 'cop':
             self.arg = False
 
-            return 'COP', {'PRED': '{}< >'.format(self.lemma)}
+            return 'COP', {'PRED': '{}< >'.format(self.form)}
 
     def convert_coordinants(self):
         if self.deprel == 'conj':
@@ -304,62 +305,63 @@ class Token:
     def generate_feat_gfs(self):
         feat_gf_upos = ['NOUN', 'VERB', 'PRON', 'PROPN']
 
-        if self.upos in feat_gf_upos:
-            if 'Case' in self.feats.keys():
-                try:
-                    self.value['CASE'] = self.feats['Case'].upper()
+        if type(self.feats) == dict:
+            if self.upos in feat_gf_upos:
+                if 'Case' in self.feats.keys():
+                    try:
+                        self.value['CASE'] = self.feats['Case'].upper()
 
-                except:
-                    self.value[0]['CASE'] = self.feats['Case'].upper()
+                    except:
+                        self.value[0]['CASE'] = self.feats['Case'].upper()
             
-            if 'Gender' in self.feats.keys():
-                try:
-                    self.value['GEN'] = self.feats['Gender'].upper()
+                if 'Gender' in self.feats.keys():
+                    try:
+                        self.value['GEN'] = self.feats['Gender'].upper()
 
-                except:
-                    self.value[0]['GEN'] = self.feats['Gender'].upper()
+                    except:
+                        self.value[0]['GEN'] = self.feats['Gender'].upper()
             
-            if 'Number' in self.feats.keys():
-                try:
-                    self.value['NUM'] = self.feats['Number'].upper()
+                if 'Number' in self.feats.keys():
+                    try:
+                        self.value['NUM'] = self.feats['Number'].upper()
 
-                except:
-                    self.value[0]['NUM'] = self.feats['Number'].upper()
+                    except:
+                        self.value[0]['NUM'] = self.feats['Number'].upper()
             
-            if 'Person' in self.feats.keys():
-                try:
-                    self.value['PERS'] = self.feats['Person'].upper()
+                if 'Person' in self.feats.keys():
+                    try:
+                        self.value['PERS'] = self.feats['Person'].upper()
 
-                except:
-                    self.value[0]['PERS'] = self.feats['Person'].upper()
+                    except:
+                        self.value[0]['PERS'] = self.feats['Person'].upper()
             
-            if 'Mood' in self.feats.keys():
-                try:
-                    self.value['MOOD'] = self.feats['Mood'].upper()
+                if 'Mood' in self.feats.keys():
+                    try:
+                        self.value['MOOD'] = self.feats['Mood'].upper()
 
-                except:
-                    self.value[0]['MOOD'] = self.feats['Mood'].upper()
+                    except:
+                        self.value[0]['MOOD'] = self.feats['Mood'].upper()
 
-            if 'Person' in self.feats.keys():
-                try:
-                    self.value['PERS'] = self.feats['Person'].upper()
+                if 'Person' in self.feats.keys():
+                    try:
+                        self.value['PERS'] = self.feats['Person'].upper()
 
-                except:
-                    self.value[0]['PERS'] = self.feats['Person'].upper()
+                    except:
+                        self.value[0]['PERS'] = self.feats['Person'].upper()
 
-            if 'Tense' in self.feats.keys():
-                try:
-                    self.value['TENSE'] = self.feats['Tense'].upper()
+                if 'Tense' in self.feats.keys():
+                    try:
+                        self.value['TENSE'] = self.feats['Tense'].upper()
 
-                except:
-                    self.value[0]['TENSE'] = self.feats['Tense'].upper()
+                    except:
+                        self.value[0]['TENSE'] = self.feats['Tense'].upper()
 
-            if 'Aspect' in self.feats.keys():
-                try:
-                    self.value['ASP'] = self.feats['Aspect'].upper()
+                if 'Aspect' in self.feats.keys():
+                    try:
+                        self.value['ASP'] = self.feats['Aspect'].upper()
 
-                except:
-                    self.value[0]['ASP'] = self.feats['Aspect'].upper()
+                    except:
+                        self.value[0]['ASP'] = self.feats['Aspect'].upper()
 
     def convert(self):
         if self.subtype == 'simple':
